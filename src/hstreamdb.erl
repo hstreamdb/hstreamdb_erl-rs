@@ -4,7 +4,15 @@
 
 -on_load(init/0).
 
--export([create_stream/5, start_producer/3, stop_producer/1, append/3, await_append_result/1]).
+-define(NOT_LOADED, not_loaded(?LINE)).
+
+-export([
+    create_stream/5,
+    start_producer/3,
+    stop_producer/1,
+    append/3,
+    await_append_result/1
+]).
 
 -export_type([producer/0, compression_type/0]).
 
@@ -18,9 +26,20 @@
     | {size, non_neg_integer()}.
 
 init() ->
-    PrivDir = code:priv_dir(hstreamdb_erl),
-    ok = erlang:load_nif(PrivDir ++ "/" ++ "libhstreamdb_erl_nifs", 0),
+    case code:priv_dir(hstreamdb_erl) of
+        {error, bad_name} ->
+            erlang:nif_error(
+                {not_loaded, [
+                    {module, ?MODULE}, {line, ?LINE}, {error, priv_dir_bad_application_name}
+                ]}
+            );
+        PrivDir ->
+            ok = erlang:load_nif(PrivDir ++ "/" ++ "libhstreamdb_erl_nifs", 0)
+    end,
     ok.
+
+not_loaded(Line) ->
+    erlang:nif_error({not_loaded, [{module, ?MODULE}, {line, Line}]}).
 
 -spec create_stream(
     ServerUrl :: binary(),
@@ -31,7 +50,7 @@ init() ->
 ) ->
     ok | {error, binary()}.
 create_stream(ServerUrl, StreamName, ReplicationFactor, BacklogDuration, ShardCount) ->
-    none.
+    ?NOT_LOADED.
 
 -spec start_producer(
     ServerUrl :: binary(),
@@ -40,17 +59,18 @@ create_stream(ServerUrl, StreamName, ReplicationFactor, BacklogDuration, ShardCo
 ) ->
     {ok, producer()} | {error, binary()}.
 start_producer(ServerUrl, StreamName, ProducerSettings) ->
-    none.
+    ?NOT_LOADED.
 
 -spec stop_producer(Producer :: producer()) -> ok.
 stop_producer(Producer) ->
-    none.
+    ?NOT_LOADED.
 
 -spec append(Producer :: producer(), PartitionKey :: binary(), RawPayload :: binary()) ->
     append_result().
 append(Producer, PartitionKey, RawPayload) ->
-    none.
+    ?NOT_LOADED.
 
--spec await_append_result(AppendResult :: append_result()) -> {ok, binary()} | {error, binary()}.
-
-await_append_result(AppendResult) -> none.
+-spec await_append_result(AppendResult :: append_result()) ->
+    {ok, binary()} | {error, binary()}.
+await_append_result(AppendResult) ->
+    ?NOT_LOADED.
