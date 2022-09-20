@@ -7,8 +7,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        otp: ["24"]
-        rebar3: ["3.18.0"]
+        otp: ["25"]
+        rebar3: ["3.19.0"]
     steps:
       - uses: actions/checkout@v3
         with:
@@ -16,8 +16,7 @@ jobs:
       - run: sudo apt-get -y install protobuf-compiler libprotobuf-dev
       - uses: actions-rs/toolchain@v1
         with:
-          profile: minimal
-          components: rustfmt, clippy
+          toolchain: nightly
       - uses: erlef/setup-beam@v1
         with:
           otp-version: ${{ matrix.otp }}
