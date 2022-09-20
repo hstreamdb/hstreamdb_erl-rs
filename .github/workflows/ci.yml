@@ -1,0 +1,25 @@
+on:
+  - push
+  - pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        otp: ["25"]
+        rebar3: ["3.19.0"]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: "recursive"
+      - run: sudo apt-get -y install protobuf-compiler libprotobuf-dev
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+      - uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp }}
+          rebar3-version: ${{ matrix.rebar3 }}
+      - run: |
+          rebar3 fmt --check && rebar3 dialyzer && rebar3 compile && rebar3 edoc
