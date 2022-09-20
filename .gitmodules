@@ -1,0 +1,3 @@
+[submodule "rs_src/hstreamdb-rust"]
+	path = rs_src/hstreamdb-rust
+	url = https://github.com/hstreamdb/hstreamdb-rust.git
