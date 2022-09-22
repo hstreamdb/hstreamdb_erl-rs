@@ -22,8 +22,9 @@
 -type producer_setting() ::
     {compression_type, compression_type()}
     | {concurrency_limit, pos_integer()}
-    | {len, non_neg_integer()}
-    | {size, non_neg_integer()}.
+    | {max_batch_len, non_neg_integer()}
+    | {max_batch_size, non_neg_integer()}
+    | {batch_deadline, non_neg_integer()}.
 
 init() ->
     case code:priv_dir(hstreamdb_erl) of
