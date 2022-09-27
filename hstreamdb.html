@@ -16,7 +16,7 @@
 <h2><a name="types">Data Types</a></h2>
 
 <h3 class="typedecl"><a name="type-append_result">append_result()</a></h3>
-<p><tt>append_result() = any()</tt></p>
+<p><tt>append_result() = reference()</tt></p>
 
 
 <h3 class="typedecl"><a name="type-compression_type">compression_type()</a></h3>
@@ -24,11 +24,11 @@
 
 
 <h3 class="typedecl"><a name="type-producer">producer()</a></h3>
-<p><tt>producer() = any()</tt></p>
+<p><tt>producer() = reference()</tt></p>
 
 
 <h3 class="typedecl"><a name="type-producer_setting">producer_setting()</a></h3>
-<p><tt>producer_setting() = {compression_type, <a href="#type-compression_type">compression_type()</a>} | {concurrency_limit, pos_integer()} | {max_batch_len, non_neg_integer()} | {max_batch_size, non_neg_integer()} | {batch_deadline, non_neg_integer()}</tt></p>
+<p><tt>producer_setting() = {compression_type, <a href="#type-compression_type">compression_type()</a>} | {concurrency_limit, pos_integer()} | {max_batch_len, non_neg_integer()} | {max_batch_size, non_neg_integer()} | {batch_deadline, non_neg_integer()} | {on_flush, pid()}</tt></p>
 
 
 <h3 class="typedecl"><a name="type-record_id">record_id()</a></h3>
