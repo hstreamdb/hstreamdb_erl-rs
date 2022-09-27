@@ -14,13 +14,15 @@
     await_append_result/1
 ]).
 -export([shard_id/1, batch_id/1, batch_index/1]).
+-export([is_ok/1, batch_len/1, batch_size/1]).
 
 -export_type([
     producer/0,
     append_result/0,
     compression_type/0,
     producer_setting/0,
-    record_id/0
+    record_id/0,
+    flush_result/0
 ]).
 
 -type producer() :: reference().
@@ -49,6 +51,24 @@ batch_id(RecordId) ->
 -spec batch_index(RecordId :: record_id()) -> non_neg_integer().
 batch_index(RecordId) ->
     RecordId#record_id.batch_index.
+
+-record(on_flush_callback_argument, {
+    is_ok :: boolean(), batch_len :: non_neg_integer(), batch_size :: non_neg_integer()
+}).
+
+-opaque flush_result() :: #on_flush_callback_argument{}.
+
+-spec is_ok(FlushResult :: flush_result()) -> boolean().
+is_ok(FlushResult) ->
+    FlushResult#on_flush_callback_argument.is_ok.
+
+-spec batch_len(FlushResult :: flush_result()) -> non_neg_integer().
+batch_len(FlushResult) ->
+    FlushResult#on_flush_callback_argument.batch_len.
+
+-spec batch_size(FlushResult :: flush_result()) -> non_neg_integer().
+batch_size(FlushResult) ->
+    FlushResult#on_flush_callback_argument.batch_size.
 
 init() ->
     case code:priv_dir(hstreamdb_erl) of
