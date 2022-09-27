@@ -23,15 +23,16 @@
     record_id/0
 ]).
 
--type producer() :: any().
--type append_result() :: any().
+-type producer() :: reference().
+-type append_result() :: reference().
 -type compression_type() :: none | gzip | zstd.
 -type producer_setting() ::
     {compression_type, compression_type()}
     | {concurrency_limit, pos_integer()}
     | {max_batch_len, non_neg_integer()}
     | {max_batch_size, non_neg_integer()}
-    | {batch_deadline, non_neg_integer()}.
+    | {batch_deadline, non_neg_integer()}
+    | {on_flush, pid()}.
 
 -record(record_id, {shard_id, batch_id, batch_index}).
 
