@@ -31,10 +31,17 @@
 <p><tt>producer_setting() = {compression_type, <a href="#type-compression_type">compression_type()</a>} | {concurrency_limit, pos_integer()} | {max_batch_len, non_neg_integer()} | {max_batch_size, non_neg_integer()} | {batch_deadline, non_neg_integer()}</tt></p>
 
 
+<h3 class="typedecl"><a name="type-record_id">record_id()</a></h3>
+<p><b>abstract datatype</b>: <tt>record_id()</tt></p>
+
+
 <h2><a name="index">Function Index</a></h2>
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#append-3">append/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#await_append_result-1">await_append_result/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#batch_id-1">batch_id/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#batch_index-1">batch_index/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#create_stream-5">create_stream/5</a></td><td></td></tr>
+<tr><td valign="top"><a href="#shard_id-1">shard_id/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#start_producer-3">start_producer/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#stop_producer-1">stop_producer/1</a></td><td></td></tr>
 </table>
@@ -49,13 +56,31 @@
 
 <h3 class="function"><a name="await_append_result-1">await_append_result/1</a></h3>
 <div class="spec">
-<p><tt>await_append_result(AppendResult::<a href="#type-append_result">append_result()</a>) -&gt; {ok, binary()} | {error, binary()}</tt><br></p>
+<p><tt>await_append_result(AppendResult::<a href="#type-append_result">append_result()</a>) -&gt; {ok, <a href="#type-record_id">record_id()</a>} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="batch_id-1">batch_id/1</a></h3>
+<div class="spec">
+<p><tt>batch_id(RecordId::<a href="#type-record_id">record_id()</a>) -&gt; non_neg_integer()</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="batch_index-1">batch_index/1</a></h3>
+<div class="spec">
+<p><tt>batch_index(RecordId::<a href="#type-record_id">record_id()</a>) -&gt; non_neg_integer()</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="create_stream-5">create_stream/5</a></h3>
 <div class="spec">
 <p><tt>create_stream(ServerUrl::binary(), StreamName::binary(), ReplicationFactor::pos_integer(), BacklogDuration::pos_integer(), ShardCount::pos_integer()) -&gt; ok | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="shard_id-1">shard_id/1</a></h3>
+<div class="spec">
+<p><tt>shard_id(RecordId::<a href="#type-record_id">record_id()</a>) -&gt; non_neg_integer()</tt><br></p>
 <p> </p>
 </div>
 
