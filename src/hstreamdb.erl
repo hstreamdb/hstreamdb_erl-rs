@@ -13,8 +13,15 @@
     append/3,
     await_append_result/1
 ]).
+-export([shard_id/1, batch_id/1, batch_index/1]).
 
--export_type([producer/0, compression_type/0]).
+-export_type([
+    producer/0,
+    append_result/0,
+    compression_type/0,
+    producer_setting/0,
+    record_id/0
+]).
 
 -type producer() :: any().
 -type append_result() :: any().
@@ -26,12 +33,30 @@
     | {max_batch_size, non_neg_integer()}
     | {batch_deadline, non_neg_integer()}.
 
+-record(record_id, {shard_id, batch_id, batch_index}).
+
+-opaque record_id() :: #record_id{}.
+
+-spec shard_id(RecordId :: record_id()) -> non_neg_integer().
+shard_id(RecordId) ->
+    RecordId#record_id.shard_id.
+
+-spec batch_id(RecordId :: record_id()) -> non_neg_integer().
+batch_id(RecordId) ->
+    RecordId#record_id.batch_id.
+
+-spec batch_index(RecordId :: record_id()) -> non_neg_integer().
+batch_index(RecordId) ->
+    RecordId#record_id.batch_index.
+
 init() ->
     case code:priv_dir(hstreamdb_erl) of
         {error, bad_name} ->
             erlang:nif_error(
                 {not_loaded, [
-                    {module, ?MODULE}, {line, ?LINE}, {error, priv_dir_bad_application_name}
+                    {module, ?MODULE},
+                    {line, ?LINE},
+                    {error, priv_dir_bad_application_name}
                 ]}
             );
         PrivDir ->
@@ -72,6 +97,6 @@ append(Producer, PartitionKey, RawPayload) ->
     ?NOT_LOADED.
 
 -spec await_append_result(AppendResult :: append_result()) ->
-    {ok, binary()} | {error, binary()}.
+    {ok, record_id()} | {error, binary()}.
 await_append_result(AppendResult) ->
     ?NOT_LOADED.
