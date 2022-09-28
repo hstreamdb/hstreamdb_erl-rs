@@ -13,8 +13,8 @@
     append/3,
     await_append_result/1
 ]).
--export([shard_id/1, batch_id/1, batch_index/1]).
--export([is_ok/1, batch_len/1, batch_size/1]).
+-export([is_record_id/1, shard_id/1, batch_id/1, batch_index/1]).
+-export([is_flush_result/1, is_ok/1, batch_len/1, batch_size/1]).
 
 -export_type([
     producer/0,
@@ -40,6 +40,17 @@
 
 -opaque record_id() :: #record_id{}.
 
+-spec is_record_id(X :: any()) -> boolean().
+is_record_id(X) ->
+    case X of
+        {record_id, ShardId, BatchId, BatchIndex} when
+            is_integer(ShardId), is_integer(BatchId), is_integer(BatchIndex)
+        ->
+            true;
+        _ ->
+            false
+    end.
+
 -spec shard_id(RecordId :: record_id()) -> non_neg_integer().
 shard_id(RecordId) ->
     RecordId#record_id.shard_id.
@@ -52,23 +63,34 @@ batch_id(RecordId) ->
 batch_index(RecordId) ->
     RecordId#record_id.batch_index.
 
--record(on_flush_callback_argument, {
+-record(flush_result, {
     is_ok :: boolean(), batch_len :: non_neg_integer(), batch_size :: non_neg_integer()
 }).
 
--opaque flush_result() :: #on_flush_callback_argument{}.
+-opaque flush_result() :: #flush_result{}.
+
+-spec is_flush_result(X :: any()) -> boolean().
+is_flush_result(X) ->
+    case X of
+        {flush_result, IsOk, BatchLen, BatchSize} when
+            is_boolean(IsOk), is_integer(BatchLen), is_integer(BatchSize)
+        ->
+            true;
+        _ ->
+            false
+    end.
 
 -spec is_ok(FlushResult :: flush_result()) -> boolean().
 is_ok(FlushResult) ->
-    FlushResult#on_flush_callback_argument.is_ok.
+    FlushResult#flush_result.is_ok.
 
 -spec batch_len(FlushResult :: flush_result()) -> non_neg_integer().
 batch_len(FlushResult) ->
-    FlushResult#on_flush_callback_argument.batch_len.
+    FlushResult#flush_result.batch_len.
 
 -spec batch_size(FlushResult :: flush_result()) -> non_neg_integer().
 batch_size(FlushResult) ->
-    FlushResult#on_flush_callback_argument.batch_size.
+    FlushResult#flush_result.batch_size.
 
 init() ->
     case code:priv_dir(hstreamdb_erl) of
