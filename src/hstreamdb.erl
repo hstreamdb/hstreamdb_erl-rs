@@ -31,6 +31,7 @@
 -type producer_setting() ::
     {compression_type, compression_type()}
     | {concurrency_limit, pos_integer()}
+    | {flow_control_size, pos_integer()}
     | {max_batch_len, non_neg_integer()}
     | {max_batch_size, non_neg_integer()}
     | {batch_deadline, non_neg_integer()}
