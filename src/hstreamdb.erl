@@ -139,7 +139,7 @@ stop_producer(Producer) ->
 -type append_error() :: {badarg, binary()} | terminated.
 
 -spec append(Producer :: producer(), PartitionKey :: binary(), RawPayload :: binary()) ->
-    {ok, append_result()} | {error, {append_error()}}.
+    {ok, append_result()} | {error, append_error()}.
 append(Producer, PartitionKey, RawPayload) ->
     ?NOT_LOADED.
 
