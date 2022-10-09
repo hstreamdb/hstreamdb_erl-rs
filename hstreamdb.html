@@ -15,6 +15,10 @@
 
 <h2><a name="types">Data Types</a></h2>
 
+<h3 class="typedecl"><a name="type-append_error">append_error()</a></h3>
+<p><tt>append_error() = {badarg, binary()} | terminated</tt></p>
+
+
 <h3 class="typedecl"><a name="type-append_result">append_result()</a></h3>
 <p><tt>append_result() = reference()</tt></p>
 
@@ -59,7 +63,7 @@
 
 <h3 class="function"><a name="append-3">append/3</a></h3>
 <div class="spec">
-<p><tt>append(Producer::<a href="#type-producer">producer()</a>, PartitionKey::binary(), RawPayload::binary()) -&gt; <a href="#type-append_result">append_result()</a></tt><br></p>
+<p><tt>append(Producer::<a href="#type-producer">producer()</a>, PartitionKey::binary(), RawPayload::binary()) -&gt; {ok, <a href="#type-append_result">append_result()</a>} | {error, <a href="#type-append_error">append_error()</a>}</tt><br></p>
 <p> </p>
 </div>
 
