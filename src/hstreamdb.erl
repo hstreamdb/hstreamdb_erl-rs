@@ -22,7 +22,8 @@
     compression_type/0,
     producer_setting/0,
     record_id/0,
-    flush_result/0
+    flush_result/0,
+    append_error/0
 ]).
 
 -type producer() :: reference().
@@ -135,8 +136,10 @@ start_producer(ServerUrl, StreamName, ProducerSettings) ->
 stop_producer(Producer) ->
     ?NOT_LOADED.
 
+-type append_error() :: {badarg, binary()} | terminated.
+
 -spec append(Producer :: producer(), PartitionKey :: binary(), RawPayload :: binary()) ->
-    append_result().
+    {ok, append_result()} | {error, {append_error()}}.
 append(Producer, PartitionKey, RawPayload) ->
     ?NOT_LOADED.
 
