@@ -26,6 +26,37 @@
     append_error/0
 ]).
 
+init() ->
+    PrivPath = priv_path(),
+    case erlang:load_nif(PrivPath, 0) of
+        ok ->
+            ok;
+        Err ->
+            erlang:nif_error(
+                {not_loaded, [
+                    {module, ?MODULE},
+                    {line, ?LINE},
+                    {priv_path, PrivPath}
+                ]}
+            )
+    end,
+    ok.
+
+priv_path() ->
+    Lib = "libhstreamdb_erl_nifs",
+    case code:priv_dir(hstreamdb_erl) of
+        {error, bad_name} ->
+            Dir = filename:dirname(
+                code:which(?MODULE)
+            ),
+            filename:join([filename:dirname(Dir), "priv", Lib]);
+        PrivDir ->
+            filename:join(PrivDir, Lib)
+    end.
+
+not_loaded(Line) ->
+    erlang:nif_error({not_loaded, [{module, ?MODULE}, {line, Line}]}).
+
 -type producer() :: reference().
 -type append_result() :: reference().
 -type compression_type() :: none | gzip | zstd.
@@ -93,24 +124,6 @@ batch_len(FlushResult) ->
 -spec batch_size(FlushResult :: flush_result()) -> non_neg_integer().
 batch_size(FlushResult) ->
     FlushResult#flush_result.batch_size.
-
-init() ->
-    case code:priv_dir(hstreamdb_erl) of
-        {error, bad_name} ->
-            erlang:nif_error(
-                {not_loaded, [
-                    {module, ?MODULE},
-                    {line, ?LINE},
-                    {error, priv_dir_bad_application_name}
-                ]}
-            );
-        PrivDir ->
-            ok = erlang:load_nif(PrivDir ++ "/" ++ "libhstreamdb_erl_nifs", 0)
-    end,
-    ok.
-
-not_loaded(Line) ->
-    erlang:nif_error({not_loaded, [{module, ?MODULE}, {line, Line}]}).
 
 -spec create_stream(
     ServerUrl :: binary(),
