@@ -134,6 +134,26 @@ batch_size(FlushResult) ->
 ) ->
     ok | {error, binary()}.
 create_stream(ServerUrl, StreamName, ReplicationFactor, BacklogDuration, ShardCount) ->
+    Pid = self(),
+    {} = async_create_stream(
+        Pid, ServerUrl, StreamName, ReplicationFactor, BacklogDuration, ShardCount
+    ),
+    receive
+        {create_stream_reply, ok} ->
+            ok;
+        {create_stream_reply, error, Err} ->
+            {error, Err}
+    end.
+
+-spec async_create_stream(
+    Pid :: pid(),
+    ServerUrl :: binary(),
+    StreamName :: binary(),
+    ReplicationFactor :: pos_integer(),
+    BacklogDuration :: pos_integer(),
+    ShardCount :: pos_integer()
+) -> {}.
+async_create_stream(Pid, ServerUrl, StreamName, ReplicationFactor, BacklogDuration, ShardCount) ->
     ?NOT_LOADED.
 
 -spec start_producer(
@@ -143,6 +163,24 @@ create_stream(ServerUrl, StreamName, ReplicationFactor, BacklogDuration, ShardCo
 ) ->
     {ok, producer()} | {error, binary()}.
 start_producer(ServerUrl, StreamName, ProducerSettings) ->
+    Pid = self(),
+    case async_start_producer(Pid, ServerUrl, StreamName, ProducerSettings) of
+        {error, Err} ->
+            {error, Err};
+        ok ->
+            receive
+                {start_producer_reply, ok, Producer} -> {ok, Producer};
+                {start_producer_reply, error, Err} -> {error, Err}
+            end
+    end.
+
+-spec async_start_producer(
+    Pid :: pid(),
+    ServerUrl :: binary(),
+    StreamName :: binary(),
+    ProducerSettings :: [producer_setting()]
+) -> ok | {error, binary()}.
+async_start_producer(Pid, ServerUrl, StreamName, ProducerSettings) ->
     ?NOT_LOADED.
 
 -spec stop_producer(Producer :: producer()) -> ok.
@@ -154,9 +192,35 @@ stop_producer(Producer) ->
 -spec append(Producer :: producer(), PartitionKey :: binary(), RawPayload :: binary()) ->
     {ok, append_result()} | {error, append_error()}.
 append(Producer, PartitionKey, RawPayload) ->
+    Pid = self(),
+    case async_append(Pid, Producer, PartitionKey, RawPayload) of
+        Err = {error, {badarg, _}} ->
+            Err;
+        ok ->
+            receive
+                {append_reply, ok, AppendResult} -> {ok, AppendResult};
+                {append_result, error, terminated} -> {error, terminated}
+            end
+    end.
+
+-spec async_append(
+    Pid :: pid(), Producer :: producer(), PartitionKey :: binary(), RawPayload :: binary()
+) ->
+    ok | {error, append_error()}.
+async_append(Pid, Producer, PartitionKey, RawPayload) ->
     ?NOT_LOADED.
 
 -spec await_append_result(AppendResult :: append_result()) ->
     {ok, record_id()} | {error, binary()}.
 await_append_result(AppendResult) ->
+    Pid = self(),
+    {} = async_await_append_result(Pid, AppendResult),
+    receive
+        {await_append_result_reply, ok, RecordId} -> {ok, RecordId};
+        {await_append_result_reply, error, Err} -> {err, Err}
+    end.
+
+-spec async_await_append_result(Pid :: pid(), AppendResult :: append_result()) ->
+    {}.
+async_await_append_result(Pid, AppendResult) ->
     ?NOT_LOADED.
