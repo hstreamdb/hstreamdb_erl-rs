@@ -2,7 +2,7 @@
 set -e
 
 RS_SRC_DIR='hstreamdb-rust'
-REV='9651bf2c9a8bb1970d69fc2bb5909c4e442bcdec'
+REV='erl'
 
 mkdir -p rs_src
 cd rs_src/

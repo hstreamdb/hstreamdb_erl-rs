@@ -183,8 +183,17 @@ start_producer(ServerUrl, StreamName, ProducerSettings) ->
 async_start_producer(Pid, ServerUrl, StreamName, ProducerSettings) ->
     ?NOT_LOADED.
 
--spec stop_producer(Producer :: producer()) -> ok.
+-spec stop_producer(Producer :: producer()) -> ok | {error, terminated}.
 stop_producer(Producer) ->
+    Pid = self(),
+    {} = async_stop_producer(Pid, Producer),
+    receive
+        {stop_producer_reply, ok} -> ok;
+        {stop_producer_reply, error, terminated} -> {error, terminated}
+    end.
+
+-spec async_stop_producer(Pid :: pid(), Producer :: producer()) -> {}.
+async_stop_producer(Pid, Producer) ->
     ?NOT_LOADED.
 
 -type append_error() :: {badarg, binary()} | terminated.
