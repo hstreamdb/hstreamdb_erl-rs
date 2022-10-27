@@ -17,6 +17,8 @@
 -export([is_record_id/1, shard_id/1, batch_id/1, batch_index/1]).
 -export([is_flush_result/1, is_ok/1, batch_len/1, batch_size/1]).
 
+-export([async_create_subscription/7, async_start_streaming_fetch/5, async_ack/2]).
+
 -export_type([
     producer/0,
     append_result/0,
@@ -35,6 +37,7 @@ init() ->
         Err ->
             erlang:nif_error(
                 {not_loaded, [
+                    {error, Err},
                     {module, ?MODULE},
                     {line, ?LINE},
                     {priv_path, PrivPath}
@@ -254,3 +257,7 @@ await_append_result(AppendResult) ->
     {}.
 async_await_append_result(Pid, AppendResult) ->
     ?NOT_LOADED.
+
+async_create_subscription(_, _, _, _, _, _, _) -> ?NOT_LOADED.
+async_start_streaming_fetch(_, _, _, _, _) -> ?NOT_LOADED.
+async_ack(_, _) -> ?NOT_LOADED.
