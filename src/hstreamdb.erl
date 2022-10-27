@@ -7,6 +7,7 @@
 -define(NOT_LOADED, not_loaded(?LINE)).
 
 -export([
+    start_client/2,
     create_stream/5,
     start_producer/3,
     stop_producer/1,
@@ -57,6 +58,7 @@ priv_path() ->
 not_loaded(Line) ->
     erlang:nif_error({not_loaded, [{module, ?MODULE}, {line, Line}]}).
 
+-type client() :: reference().
 -type producer() :: reference().
 -type append_result() :: reference().
 -type compression_type() :: none | gzip | zstd.
@@ -125,18 +127,37 @@ batch_len(FlushResult) ->
 batch_size(FlushResult) ->
     FlushResult#flush_result.batch_size.
 
--spec create_stream(
+-spec start_client(
     ServerUrl :: binary(),
+    Options :: proplists:proplist()
+) -> {ok, client()} | {error, binary()}.
+start_client(ServerUrl, Options) ->
+    Pid = self(),
+    {} = async_start_client(Pid, ServerUrl, Options),
+    receive
+        {start_client_reply, ok, Client} -> {ok, Client};
+        {start_client_reply, error, Err} -> {error, Err}
+    end.
+
+-spec async_start_client(
+    Pid :: pid(),
+    ServerUrl :: binary(),
+    Options :: proplists:proplist()
+) -> {}.
+async_start_client(Pid, ServerUrl, Options) -> ?NOT_LOADED.
+
+-spec create_stream(
+    Client :: client(),
     StreamName :: binary(),
     ReplicationFactor :: pos_integer(),
     BacklogDuration :: pos_integer(),
     ShardCount :: pos_integer()
 ) ->
     ok | {error, binary()}.
-create_stream(ServerUrl, StreamName, ReplicationFactor, BacklogDuration, ShardCount) ->
+create_stream(Client, StreamName, ReplicationFactor, BacklogDuration, ShardCount) ->
     Pid = self(),
     {} = async_create_stream(
-        Pid, ServerUrl, StreamName, ReplicationFactor, BacklogDuration, ShardCount
+        Pid, Client, StreamName, ReplicationFactor, BacklogDuration, ShardCount
     ),
     receive
         {create_stream_reply, ok} ->
@@ -147,24 +168,24 @@ create_stream(ServerUrl, StreamName, ReplicationFactor, BacklogDuration, ShardCo
 
 -spec async_create_stream(
     Pid :: pid(),
-    ServerUrl :: binary(),
+    Client :: client(),
     StreamName :: binary(),
     ReplicationFactor :: pos_integer(),
     BacklogDuration :: pos_integer(),
     ShardCount :: pos_integer()
 ) -> {}.
-async_create_stream(Pid, ServerUrl, StreamName, ReplicationFactor, BacklogDuration, ShardCount) ->
+async_create_stream(Pid, Client, StreamName, ReplicationFactor, BacklogDuration, ShardCount) ->
     ?NOT_LOADED.
 
 -spec start_producer(
-    ServerUrl :: binary(),
+    Client :: client(),
     StreamName :: binary(),
     ProducerSettings :: [producer_setting()]
 ) ->
     {ok, producer()} | {error, binary()}.
-start_producer(ServerUrl, StreamName, ProducerSettings) ->
+start_producer(Client, StreamName, ProducerSettings) ->
     Pid = self(),
-    case async_start_producer(Pid, ServerUrl, StreamName, ProducerSettings) of
+    case async_start_producer(Pid, Client, StreamName, ProducerSettings) of
         {error, Err} ->
             {error, Err};
         ok ->
@@ -176,11 +197,11 @@ start_producer(ServerUrl, StreamName, ProducerSettings) ->
 
 -spec async_start_producer(
     Pid :: pid(),
-    ServerUrl :: binary(),
+    Client :: client(),
     StreamName :: binary(),
     ProducerSettings :: [producer_setting()]
 ) -> ok | {error, binary()}.
-async_start_producer(Pid, ServerUrl, StreamName, ProducerSettings) ->
+async_start_producer(Pid, Client, StreamName, ProducerSettings) ->
     ?NOT_LOADED.
 
 -spec stop_producer(Producer :: producer()) -> ok | {error, terminated}.
