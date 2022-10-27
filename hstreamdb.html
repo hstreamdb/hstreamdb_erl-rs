@@ -23,12 +23,20 @@
 <p><tt>append_result() = reference()</tt></p>
 
 
+<h3 class="typedecl"><a name="type-client">client()</a></h3>
+<p><tt>client() = reference()</tt></p>
+
+
 <h3 class="typedecl"><a name="type-compression_type">compression_type()</a></h3>
 <p><tt>compression_type() = none | gzip | zstd</tt></p>
 
 
 <h3 class="typedecl"><a name="type-flush_result">flush_result()</a></h3>
 <p><b>abstract datatype</b>: <tt>flush_result()</tt></p>
+
+
+<h3 class="typedecl"><a name="type-payload_type">payload_type()</a></h3>
+<p><tt>payload_type() = h_record | raw_record</tt></p>
 
 
 <h3 class="typedecl"><a name="type-producer">producer()</a></h3>
@@ -43,23 +51,45 @@
 <p><b>abstract datatype</b>: <tt>record_id()</tt></p>
 
 
+<h3 class="typedecl"><a name="type-responder">responder()</a></h3>
+<p><tt>responder() = reference()</tt></p>
+
+
+<h3 class="typedecl"><a name="type-special_offset">special_offset()</a></h3>
+<p><tt>special_offset() = earliest | latest</tt></p>
+
+
+<h3 class="typedecl"><a name="type-streaming_fetch_message">streaming_fetch_message()</a></h3>
+<p><tt>streaming_fetch_message() = {streaming_fetch, ConsumerName::binary(), reply, <a href="#type-payload_type">payload_type()</a>, Payload::binary(), <a href="#type-responder">responder()</a>} | {streaming_fetch, ConsumerName::binary(), eos}</tt></p>
+
+
 <h2><a name="index">Function Index</a></h2>
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#append-3">append/3</a></td><td></td></tr>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#ack-1">ack/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#append-3">append/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#await_append_result-1">await_append_result/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#batch_id-1">batch_id/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#batch_index-1">batch_index/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#batch_len-1">batch_len/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#batch_size-1">batch_size/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#create_stream-5">create_stream/5</a></td><td></td></tr>
+<tr><td valign="top"><a href="#create_subscription-6">create_subscription/6</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_flush_result-1">is_flush_result/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_ok-1">is_ok/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_record_id-1">is_record_id/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#shard_id-1">shard_id/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#start_client-2">start_client/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#start_producer-3">start_producer/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#start_streaming_fetch-4">start_streaming_fetch/4</a></td><td></td></tr>
 <tr><td valign="top"><a href="#stop_producer-1">stop_producer/1</a></td><td></td></tr>
 </table>
 
 <h2><a name="functions">Function Details</a></h2>
+
+<h3 class="function"><a name="ack-1">ack/1</a></h3>
+<div class="spec">
+<p><tt>ack(Responder::<a href="#type-responder">responder()</a>) -&gt; ok | {error, already_acked} | {error, terminated}</tt><br></p>
+<p> </p>
+</div>
 
 <h3 class="function"><a name="append-3">append/3</a></h3>
 <div class="spec">
@@ -99,7 +129,13 @@
 
 <h3 class="function"><a name="create_stream-5">create_stream/5</a></h3>
 <div class="spec">
-<p><tt>create_stream(ServerUrl::binary(), StreamName::binary(), ReplicationFactor::pos_integer(), BacklogDuration::pos_integer(), ShardCount::pos_integer()) -&gt; ok | {error, binary()}</tt><br></p>
+<p><tt>create_stream(Client::<a href="#type-client">client()</a>, StreamName::binary(), ReplicationFactor::pos_integer(), BacklogDuration::pos_integer(), ShardCount::pos_integer()) -&gt; ok | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="create_subscription-6">create_subscription/6</a></h3>
+<div class="spec">
+<p><tt>create_subscription(Client::<a href="#type-client">client()</a>, SubscriptionId::binary(), StreamName::binary(), AckTimeoutSeconds::pos_integer(), MaxUnackedRecords::pos_integer(), SpecialOffset::<a href="#type-special_offset">special_offset()</a>) -&gt; ok | {error, {badarg, binary()}} | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
@@ -127,9 +163,21 @@
 <p> </p>
 </div>
 
+<h3 class="function"><a name="start_client-2">start_client/2</a></h3>
+<div class="spec">
+<p><tt>start_client(ServerUrl::binary(), Options::<a href="http://www.erlang.org/edoc/doc/stdlib/doc/proplists.html#type-proplist">proplists:proplist()</a>) -&gt; {ok, <a href="#type-client">client()</a>} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="start_producer-3">start_producer/3</a></h3>
 <div class="spec">
-<p><tt>start_producer(ServerUrl::binary(), StreamName::binary(), ProducerSettings::[<a href="#type-producer_setting">producer_setting()</a>]) -&gt; {ok, <a href="#type-producer">producer()</a>} | {error, binary()}</tt><br></p>
+<p><tt>start_producer(Client::<a href="#type-client">client()</a>, StreamName::binary(), ProducerSettings::[<a href="#type-producer_setting">producer_setting()</a>]) -&gt; {ok, <a href="#type-producer">producer()</a>} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="start_streaming_fetch-4">start_streaming_fetch/4</a></h3>
+<div class="spec">
+<p><tt>start_streaming_fetch(Client::<a href="#type-client">client()</a>, ReturnPid::pid(), ConsumerName::binary(), SubscriptionId::binary()) -&gt; ok | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
