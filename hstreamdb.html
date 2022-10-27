@@ -47,6 +47,10 @@
 <p><tt>producer_setting() = {compression_type, <a href="#type-compression_type">compression_type()</a>} | {concurrency_limit, pos_integer()} | {flow_control_size, pos_integer()} | {max_batch_len, non_neg_integer()} | {max_batch_size, non_neg_integer()} | {batch_deadline, non_neg_integer()} | {on_flush, pid()}</tt></p>
 
 
+<h3 class="typedecl"><a name="type-read_shard_result">read_shard_result()</a></h3>
+<p><tt>read_shard_result() = {h_record, binary()} | {raw_record, binary()} | {bad_hstream_record, binary()}</tt></p>
+
+
 <h3 class="typedecl"><a name="type-record_id">record_id()</a></h3>
 <p><b>abstract datatype</b>: <tt>record_id()</tt></p>
 
@@ -55,8 +59,16 @@
 <p><tt>responder() = reference()</tt></p>
 
 
+<h3 class="typedecl"><a name="type-shard_reader_id">shard_reader_id()</a></h3>
+<p><tt>shard_reader_id() = reference()</tt></p>
+
+
 <h3 class="typedecl"><a name="type-special_offset">special_offset()</a></h3>
 <p><tt>special_offset() = earliest | latest</tt></p>
+
+
+<h3 class="typedecl"><a name="type-stream_shard_offset">stream_shard_offset()</a></h3>
+<p><tt>stream_shard_offset() = <a href="#type-special_offset">special_offset()</a> | <a href="#type-record_id">record_id()</a></tt></p>
 
 
 <h3 class="typedecl"><a name="type-streaming_fetch_message">streaming_fetch_message()</a></h3>
@@ -71,11 +83,13 @@
 <tr><td valign="top"><a href="#batch_index-1">batch_index/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#batch_len-1">batch_len/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#batch_size-1">batch_size/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#create_shard_reader-6">create_shard_reader/6</a></td><td></td></tr>
 <tr><td valign="top"><a href="#create_stream-5">create_stream/5</a></td><td></td></tr>
 <tr><td valign="top"><a href="#create_subscription-6">create_subscription/6</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_flush_result-1">is_flush_result/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_ok-1">is_ok/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_record_id-1">is_record_id/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#read_shard-3">read_shard/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#shard_id-1">shard_id/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#start_client-2">start_client/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#start_producer-3">start_producer/3</a></td><td></td></tr>
@@ -127,6 +141,12 @@
 <p> </p>
 </div>
 
+<h3 class="function"><a name="create_shard_reader-6">create_shard_reader/6</a></h3>
+<div class="spec">
+<p><tt>create_shard_reader(Client::<a href="#type-client">client()</a>, ReaderId::binary(), StreamName::binary(), ShardId::non_neg_integer(), StreamShardOffset::<a href="#type-stream_shard_offset">stream_shard_offset()</a>, TimeoutMs::pos_integer()) -&gt; {ok, <a href="#type-shard_reader_id">shard_reader_id()</a>} | {error, {badarg, binary()}} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="create_stream-5">create_stream/5</a></h3>
 <div class="spec">
 <p><tt>create_stream(Client::<a href="#type-client">client()</a>, StreamName::binary(), ReplicationFactor::pos_integer(), BacklogDuration::pos_integer(), ShardCount::pos_integer()) -&gt; ok | {error, binary()}</tt><br></p>
@@ -154,6 +174,12 @@
 <h3 class="function"><a name="is_record_id-1">is_record_id/1</a></h3>
 <div class="spec">
 <p><tt>is_record_id(X::any()) -&gt; boolean()</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="read_shard-3">read_shard/3</a></h3>
+<div class="spec">
+<p><tt>read_shard(Client::<a href="#type-client">client()</a>, ShardReaderId::<a href="#type-shard_reader_id">shard_reader_id()</a>, MaxRecords::non_neg_integer()) -&gt; {ok, [<a href="#type-read_shard_result">read_shard_result()</a>]} | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
