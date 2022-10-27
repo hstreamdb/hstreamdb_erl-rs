@@ -15,7 +15,9 @@
     append/3,
     await_append_result/1,
     start_streaming_fetch/4,
-    ack/1
+    ack/1,
+    create_shard_reader/6,
+    read_shard/3
 ]).
 -export([is_record_id/1, shard_id/1, batch_id/1, batch_index/1]).
 -export([is_flush_result/1, is_ok/1, batch_len/1, batch_size/1]).
@@ -30,8 +32,11 @@
     flush_result/0,
     append_error/0,
     special_offset/0,
+    stream_shard_offset/0,
     responder/0,
-    streaming_fetch_message/0
+    streaming_fetch_message/0,
+    shard_reader_id/0,
+    read_shard_result/0
 ]).
 
 init() ->
@@ -80,7 +85,9 @@ not_loaded(Line) ->
     | {batch_deadline, non_neg_integer()}
     | {on_flush, pid()}.
 -type special_offset() :: earliest | latest.
+-type stream_shard_offset() :: special_offset() | record_id().
 -type responder() :: reference().
+-type shard_reader_id() :: reference().
 
 -record(record_id, {shard_id, batch_id, batch_index}).
 
@@ -400,4 +407,96 @@ ack(Responder) ->
 
 -spec async_ack(Pid :: pid(), Responder :: responder()) -> {}.
 async_ack(Pid, Responder) ->
+    ?NOT_LOADED.
+
+-spec create_shard_reader(
+    Client :: client(),
+    ReaderId :: binary(),
+    StreamName :: binary(),
+    ShardId :: non_neg_integer(),
+    StreamShardOffset :: stream_shard_offset(),
+    TimeoutMs :: pos_integer()
+) ->
+    {ok, shard_reader_id()}
+    | {error, {badarg, binary()}}
+    | {error, binary()}.
+create_shard_reader(
+    Client,
+    ReaderId,
+    StreamName,
+    ShardId,
+    StreamShardOffset,
+    TimeoutMs
+) ->
+    Pid = self(),
+    case
+        async_create_shard_reader(
+            Pid,
+            Client,
+            ReaderId,
+            StreamName,
+            ShardId,
+            StreamShardOffset,
+            TimeoutMs
+        )
+    of
+        {error, {badarg, Err}} ->
+            {error, {badarg, Err}};
+        ok ->
+            receive
+                {create_shard_reader_reply, ok, ShardReaderId} ->
+                    ShardReaderId;
+                {create_shard_reader_reply, error, Err} ->
+                    {error, Err}
+            end
+    end.
+
+-spec async_create_shard_reader(
+    Pid :: pid(),
+    Client :: client(),
+    ReaderId :: binary(),
+    StreamName :: binary(),
+    ShardId :: non_neg_integer(),
+    StreamShardOffset :: stream_shard_offset(),
+    TimeoutMs :: pos_integer()
+) ->
+    ok | {error, {badarg, binary()}}.
+async_create_shard_reader(
+    Pid,
+    Client,
+    ReaderId,
+    StreamName,
+    ShardId,
+    StreamShardOffset,
+    TimeoutMs
+) ->
+    ?NOT_LOADED.
+
+-type read_shard_result() ::
+    {h_record, binary()} | {raw_record, binary()} | {bad_hstream_record, binary()}.
+
+-spec read_shard(
+    Client :: client(),
+    ShardReaderId :: shard_reader_id(),
+    MaxRecords :: non_neg_integer()
+) ->
+    {ok, [read_shard_result()]} | {error, binary()}.
+read_shard(Client, ShardReaderId, MaxRecords) ->
+    Pid = self(),
+    {} = async_read_shard(Pid, Client, ShardReaderId, MaxRecords),
+    receive
+        {read_shard_reply, ok, Records} ->
+            {ok, Records};
+        {read_shard_reply, error, Err} ->
+            {error, Err}
+    end.
+
+-spec async_read_shard(
+    Pid :: pid(),
+    Client :: client(),
+    ShardReaderId :: shard_reader_id(),
+    MaxRecords :: non_neg_integer()
+) ->
+    {}.
+async_read_shard(Pid, Client, ShardReaderId, MaxRecords) ->
     ?NOT_LOADED.
