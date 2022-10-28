@@ -27,6 +27,14 @@
 <p><tt>client() = reference()</tt></p>
 
 
+<h3 class="typedecl"><a name="type-client_setting">client_setting()</a></h3>
+<p><tt>client_setting() = {concurrency_limit, pos_integer()} | {tls_config, <a href="#type-client_tls_config">client_tls_config()</a>}</tt></p>
+
+
+<h3 class="typedecl"><a name="type-client_tls_config">client_tls_config()</a></h3>
+<p><tt>client_tls_config() = reference()</tt></p>
+
+
 <h3 class="typedecl"><a name="type-compression_type">compression_type()</a></h3>
 <p><tt>compression_type() = none | gzip | zstd</tt></p>
 
@@ -89,7 +97,11 @@
 <tr><td valign="top"><a href="#is_flush_result-1">is_flush_result/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_ok-1">is_ok/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_record_id-1">is_record_id/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#new_client_tls_config-0">new_client_tls_config/0</a></td><td></td></tr>
 <tr><td valign="top"><a href="#read_shard-3">read_shard/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#set_ca_certificate-2">set_ca_certificate/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#set_domain_name-2">set_domain_name/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#set_identity-3">set_identity/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#shard_id-1">shard_id/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#start_client-2">start_client/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#start_producer-3">start_producer/3</a></td><td></td></tr>
@@ -177,9 +189,33 @@
 <p> </p>
 </div>
 
+<h3 class="function"><a name="new_client_tls_config-0">new_client_tls_config/0</a></h3>
+<div class="spec">
+<p><tt>new_client_tls_config() -&gt; <a href="#type-client_tls_config">client_tls_config()</a></tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="read_shard-3">read_shard/3</a></h3>
 <div class="spec">
 <p><tt>read_shard(Client::<a href="#type-client">client()</a>, ShardReaderId::<a href="#type-shard_reader_id">shard_reader_id()</a>, MaxRecords::non_neg_integer()) -&gt; {ok, [<a href="#type-read_shard_result">read_shard_result()</a>]} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="set_ca_certificate-2">set_ca_certificate/2</a></h3>
+<div class="spec">
+<p><tt>set_ca_certificate(TlsConfig::<a href="#type-client_tls_config">client_tls_config()</a>, CaCertificate::binary()) -&gt; <a href="#type-client_tls_config">client_tls_config()</a></tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="set_domain_name-2">set_domain_name/2</a></h3>
+<div class="spec">
+<p><tt>set_domain_name(TlsConfig::<a href="#type-client_tls_config">client_tls_config()</a>, DomainName::binary()) -&gt; <a href="#type-client_tls_config">client_tls_config()</a></tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="set_identity-3">set_identity/3</a></h3>
+<div class="spec">
+<p><tt>set_identity(TlsConfig::<a href="#type-client_tls_config">client_tls_config()</a>, Cert::binary(), Key::binary()) -&gt; <a href="#type-client_tls_config">client_tls_config()</a></tt><br></p>
 <p> </p>
 </div>
 
@@ -191,7 +227,7 @@
 
 <h3 class="function"><a name="start_client-2">start_client/2</a></h3>
 <div class="spec">
-<p><tt>start_client(ServerUrl::binary(), Options::<a href="http://www.erlang.org/edoc/doc/stdlib/doc/proplists.html#type-proplist">proplists:proplist()</a>) -&gt; {ok, <a href="#type-client">client()</a>} | {error, binary()}</tt><br></p>
+<p><tt>start_client(ServerUrl::binary(), Options::[<a href="#type-client_setting">client_setting()</a>]) -&gt; {ok, <a href="#type-client">client()</a>} | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
