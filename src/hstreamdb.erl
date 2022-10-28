@@ -182,7 +182,7 @@ set_identity(TlsConfig, Cert, Key) ->
     {ok, client()} | {error, binary()}.
 start_client(ServerUrl, Options) ->
     Pid = self(),
-    {} = async_start_client(Pid, ServerUrl, Options),
+    ok = async_start_client(Pid, ServerUrl, Options),
     receive
         {start_client_reply, ok, Client} ->
             {ok, Client};
@@ -195,7 +195,7 @@ start_client(ServerUrl, Options) ->
     ServerUrl :: binary(),
     Options :: [client_setting()]
 ) ->
-    {}.
+    ok | {error, {badarg, binary()}}.
 async_start_client(Pid, ServerUrl, Options) ->
     ?NOT_LOADED.
 
