@@ -8,6 +8,10 @@
 
 -export([
     start_client/2,
+    new_client_tls_config/0,
+    set_domain_name/2,
+    set_ca_certificate/2,
+    set_identity/3,
     create_stream/5,
     create_subscription/6,
     start_producer/3,
@@ -23,10 +27,12 @@
 -export([is_flush_result/1, is_ok/1, batch_len/1, batch_size/1]).
 
 -export_type([
+    client_tls_config/0,
     payload_type/0,
     producer/0,
     append_result/0,
     compression_type/0,
+    client_setting/0,
     producer_setting/0,
     record_id/0,
     flush_result/0,
@@ -76,6 +82,8 @@ not_loaded(Line) ->
 -type producer() :: reference().
 -type append_result() :: reference().
 -type compression_type() :: none | gzip | zstd.
+-type client_setting() ::
+    {concurrency_limit, pos_integer()} | {tls_config, client_tls_config()}.
 -type producer_setting() ::
     {compression_type, compression_type()}
     | {concurrency_limit, pos_integer()}
@@ -89,7 +97,11 @@ not_loaded(Line) ->
 -type responder() :: reference().
 -type shard_reader_id() :: reference().
 
--record(record_id, {shard_id, batch_id, batch_index}).
+-record(record_id, {
+    shard_id :: non_neg_integer(),
+    batch_id :: non_neg_integer(),
+    batch_index :: non_neg_integer()
+}).
 
 -opaque record_id() :: #record_id{}.
 
@@ -145,7 +157,28 @@ batch_len(FlushResult) ->
 batch_size(FlushResult) ->
     FlushResult#flush_result.batch_size.
 
--spec start_client(ServerUrl :: binary(), Options :: proplists:proplist()) ->
+-type client_tls_config() :: reference().
+
+-spec new_client_tls_config() -> client_tls_config().
+new_client_tls_config() ->
+    ?NOT_LOADED.
+
+-spec set_domain_name(TlsConfig :: client_tls_config(), DomainName :: binary()) ->
+    client_tls_config().
+set_domain_name(TlsConfig, DomainName) ->
+    ?NOT_LOADED.
+
+-spec set_ca_certificate(TlsConfig :: client_tls_config(), CaCertificate :: binary()) ->
+    client_tls_config().
+set_ca_certificate(TlsConfig, CaCertificate) ->
+    ?NOT_LOADED.
+
+-spec set_identity(TlsConfig :: client_tls_config(), Cert :: binary(), Key :: binary()) ->
+    client_tls_config().
+set_identity(TlsConfig, Cert, Key) ->
+    ?NOT_LOADED.
+
+-spec start_client(ServerUrl :: binary(), Options :: [client_setting()]) ->
     {ok, client()} | {error, binary()}.
 start_client(ServerUrl, Options) ->
     Pid = self(),
@@ -160,7 +193,7 @@ start_client(ServerUrl, Options) ->
 -spec async_start_client(
     Pid :: pid(),
     ServerUrl :: binary(),
-    Options :: proplists:proplist()
+    Options :: [client_setting()]
 ) ->
     {}.
 async_start_client(Pid, ServerUrl, Options) ->
@@ -323,16 +356,12 @@ async_stop_producer(Pid, Producer) ->
     {ok, append_result()} | {error, append_error()}.
 append(Producer, PartitionKey, RawPayload) ->
     Pid = self(),
-    case async_append(Pid, Producer, PartitionKey, RawPayload) of
-        Err = {error, {badarg, _}} ->
-            Err;
-        ok ->
-            receive
-                {append_reply, ok, AppendResult} ->
-                    {ok, AppendResult};
-                {append_result, error, terminated} ->
-                    {error, terminated}
-            end
+    {} = async_append(Pid, Producer, PartitionKey, RawPayload),
+    receive
+        {append_reply, ok, AppendResult} ->
+            {ok, AppendResult};
+        {append_result, error, terminated} ->
+            {error, terminated}
     end.
 
 -spec async_append(
@@ -341,7 +370,7 @@ append(Producer, PartitionKey, RawPayload) ->
     PartitionKey :: binary(),
     RawPayload :: binary()
 ) ->
-    ok | {error, append_error()}.
+    {}.
 async_append(Pid, Producer, PartitionKey, RawPayload) ->
     ?NOT_LOADED.
 
