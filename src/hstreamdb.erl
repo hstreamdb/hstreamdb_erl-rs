@@ -15,7 +15,6 @@
     create_stream/5,
     create_subscription/6,
     start_producer/3,
-    stop_producer/1,
     append/3,
     await_append_result/1,
     start_streaming_fetch/4,
@@ -36,7 +35,6 @@
     producer_setting/0,
     record_id/0,
     flush_result/0,
-    append_error/0,
     special_offset/0,
     stream_shard_offset/0,
     responder/0,
@@ -335,33 +333,16 @@ start_producer(Client, StreamName, ProducerSettings) ->
 async_start_producer(Pid, Client, StreamName, ProducerSettings) ->
     ?NOT_LOADED.
 
--spec stop_producer(Producer :: producer()) -> ok | {error, terminated}.
-stop_producer(Producer) ->
-    Pid = self(),
-    {} = async_stop_producer(Pid, Producer),
-    receive
-        {stop_producer_reply, ok} ->
-            ok;
-        {stop_producer_reply, error, terminated} ->
-            {error, terminated}
-    end.
-
--spec async_stop_producer(Pid :: pid(), Producer :: producer()) -> {}.
-async_stop_producer(Pid, Producer) ->
-    ?NOT_LOADED.
-
--type append_error() :: {badarg, binary()} | terminated.
-
 -spec append(Producer :: producer(), PartitionKey :: binary(), RawPayload :: binary()) ->
-    {ok, append_result()} | {error, append_error()}.
+    {ok, append_result()} | {error, binary()}.
 append(Producer, PartitionKey, RawPayload) ->
     Pid = self(),
     {} = async_append(Pid, Producer, PartitionKey, RawPayload),
     receive
         {append_reply, ok, AppendResult} ->
             {ok, AppendResult};
-        {append_result, error, terminated} ->
-            {error, terminated}
+        {append_reply, error, Err} ->
+            {error, Err}
     end.
 
 -spec async_append(
