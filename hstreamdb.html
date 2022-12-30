@@ -15,10 +15,6 @@
 
 <h2><a name="types">Data Types</a></h2>
 
-<h3 class="typedecl"><a name="type-append_error">append_error()</a></h3>
-<p><tt>append_error() = {badarg, binary()} | terminated</tt></p>
-
-
 <h3 class="typedecl"><a name="type-append_result">append_result()</a></h3>
 <p><tt>append_result() = reference()</tt></p>
 
@@ -106,7 +102,6 @@
 <tr><td valign="top"><a href="#start_client-2">start_client/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#start_producer-3">start_producer/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#start_streaming_fetch-4">start_streaming_fetch/4</a></td><td></td></tr>
-<tr><td valign="top"><a href="#stop_producer-1">stop_producer/1</a></td><td></td></tr>
 </table>
 
 <h2><a name="functions">Function Details</a></h2>
@@ -119,7 +114,7 @@
 
 <h3 class="function"><a name="append-3">append/3</a></h3>
 <div class="spec">
-<p><tt>append(Producer::<a href="#type-producer">producer()</a>, PartitionKey::binary(), RawPayload::binary()) -&gt; {ok, <a href="#type-append_result">append_result()</a>} | {error, <a href="#type-append_error">append_error()</a>}</tt><br></p>
+<p><tt>append(Producer::<a href="#type-producer">producer()</a>, PartitionKey::binary(), RawPayload::binary()) -&gt; {ok, <a href="#type-append_result">append_result()</a>} | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
@@ -240,12 +235,6 @@
 <h3 class="function"><a name="start_streaming_fetch-4">start_streaming_fetch/4</a></h3>
 <div class="spec">
 <p><tt>start_streaming_fetch(Client::<a href="#type-client">client()</a>, ReturnPid::pid(), ConsumerName::binary(), SubscriptionId::binary()) -&gt; ok | {error, binary()}</tt><br></p>
-<p> </p>
-</div>
-
-<h3 class="function"><a name="stop_producer-1">stop_producer/1</a></h3>
-<div class="spec">
-<p><tt>stop_producer(Producer::<a href="#type-producer">producer()</a>) -&gt; ok | {error, terminated}</tt><br></p>
 <p> </p>
 </div>
 <hr>
