@@ -81,27 +81,37 @@
 
 <h2><a name="index">Function Index</a></h2>
 <table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#ack-1">ack/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#ack-2">ack/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#append-3">append/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#append-4">append/4</a></td><td></td></tr>
 <tr><td valign="top"><a href="#await_append_result-1">await_append_result/1</a></td><td></td></tr>
+<tr><td valign="top"><a href="#await_append_result-2">await_append_result/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#batch_id-1">batch_id/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#batch_index-1">batch_index/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#batch_len-1">batch_len/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#batch_size-1">batch_size/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#create_shard_reader-6">create_shard_reader/6</a></td><td></td></tr>
+<tr><td valign="top"><a href="#create_shard_reader-7">create_shard_reader/7</a></td><td></td></tr>
 <tr><td valign="top"><a href="#create_stream-5">create_stream/5</a></td><td></td></tr>
+<tr><td valign="top"><a href="#create_stream-6">create_stream/6</a></td><td></td></tr>
 <tr><td valign="top"><a href="#create_subscription-6">create_subscription/6</a></td><td></td></tr>
+<tr><td valign="top"><a href="#create_subscription-7">create_subscription/7</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_flush_result-1">is_flush_result/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_ok-1">is_ok/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_record_id-1">is_record_id/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#new_client_tls_config-0">new_client_tls_config/0</a></td><td></td></tr>
 <tr><td valign="top"><a href="#read_shard-3">read_shard/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#read_shard-4">read_shard/4</a></td><td></td></tr>
 <tr><td valign="top"><a href="#set_ca_certificate-2">set_ca_certificate/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#set_domain_name-2">set_domain_name/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#set_identity-3">set_identity/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#shard_id-1">shard_id/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#start_client-2">start_client/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#start_client-3">start_client/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#start_producer-3">start_producer/3</a></td><td></td></tr>
+<tr><td valign="top"><a href="#start_producer-4">start_producer/4</a></td><td></td></tr>
 <tr><td valign="top"><a href="#start_streaming_fetch-4">start_streaming_fetch/4</a></td><td></td></tr>
+<tr><td valign="top"><a href="#start_streaming_fetch-5">start_streaming_fetch/5</a></td><td></td></tr>
 </table>
 
 <h2><a name="functions">Function Details</a></h2>
@@ -112,15 +122,33 @@
 <p> </p>
 </div>
 
+<h3 class="function"><a name="ack-2">ack/2</a></h3>
+<div class="spec">
+<p><tt>ack(Responder::<a href="#type-responder">responder()</a>, Timeout::timeout()) -&gt; ok | {error, already_acked} | {error, terminated}</tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="append-3">append/3</a></h3>
 <div class="spec">
 <p><tt>append(Producer::<a href="#type-producer">producer()</a>, PartitionKey::binary(), RawPayload::binary()) -&gt; {ok, <a href="#type-append_result">append_result()</a>} | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
+<h3 class="function"><a name="append-4">append/4</a></h3>
+<div class="spec">
+<p><tt>append(Producer::<a href="#type-producer">producer()</a>, PartitionKey::binary(), RawPayload::binary(), Timeout::timeout()) -&gt; {ok, <a href="#type-append_result">append_result()</a>} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="await_append_result-1">await_append_result/1</a></h3>
 <div class="spec">
 <p><tt>await_append_result(AppendResult::<a href="#type-append_result">append_result()</a>) -&gt; {ok, <a href="#type-record_id">record_id()</a>} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="await_append_result-2">await_append_result/2</a></h3>
+<div class="spec">
+<p><tt>await_append_result(AppendResult::<a href="#type-append_result">append_result()</a>, Timeout::timeout()) -&gt; {ok, <a href="#type-record_id">record_id()</a>} | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
@@ -154,15 +182,33 @@
 <p> </p>
 </div>
 
+<h3 class="function"><a name="create_shard_reader-7">create_shard_reader/7</a></h3>
+<div class="spec">
+<p><tt>create_shard_reader(Client::<a href="#type-client">client()</a>, ReaderId::binary(), StreamName::binary(), ShardId::non_neg_integer(), StreamShardOffset::<a href="#type-stream_shard_offset">stream_shard_offset()</a>, TimeoutMs::pos_integer(), Timeout::timeout()) -&gt; {ok, <a href="#type-shard_reader_id">shard_reader_id()</a>} | {error, {badarg, binary()}} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="create_stream-5">create_stream/5</a></h3>
 <div class="spec">
 <p><tt>create_stream(Client::<a href="#type-client">client()</a>, StreamName::binary(), ReplicationFactor::pos_integer(), BacklogDuration::pos_integer(), ShardCount::pos_integer()) -&gt; ok | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
+<h3 class="function"><a name="create_stream-6">create_stream/6</a></h3>
+<div class="spec">
+<p><tt>create_stream(Client::<a href="#type-client">client()</a>, StreamName::binary(), ReplicationFactor::pos_integer(), BacklogDuration::pos_integer(), ShardCount::pos_integer(), Timeout::timeout()) -&gt; ok | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="create_subscription-6">create_subscription/6</a></h3>
 <div class="spec">
 <p><tt>create_subscription(Client::<a href="#type-client">client()</a>, SubscriptionId::binary(), StreamName::binary(), AckTimeoutSeconds::pos_integer(), MaxUnackedRecords::pos_integer(), SpecialOffset::<a href="#type-special_offset">special_offset()</a>) -&gt; ok | {error, {badarg, binary()}} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="create_subscription-7">create_subscription/7</a></h3>
+<div class="spec">
+<p><tt>create_subscription(Client::<a href="#type-client">client()</a>, SubscriptionId::binary(), StreamName::binary(), AckTimeoutSeconds::pos_integer(), MaxUnackedRecords::pos_integer(), SpecialOffset::<a href="#type-special_offset">special_offset()</a>, Timeout::timeout()) -&gt; ok | {error, {badarg, binary()}} | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
@@ -196,6 +242,12 @@
 <p> </p>
 </div>
 
+<h3 class="function"><a name="read_shard-4">read_shard/4</a></h3>
+<div class="spec">
+<p><tt>read_shard(Client::<a href="#type-client">client()</a>, ShardReaderId::<a href="#type-shard_reader_id">shard_reader_id()</a>, MaxRecords::non_neg_integer(), Timeout::timeout()) -&gt; {ok, [<a href="#type-read_shard_result">read_shard_result()</a>]} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="set_ca_certificate-2">set_ca_certificate/2</a></h3>
 <div class="spec">
 <p><tt>set_ca_certificate(TlsConfig::<a href="#type-client_tls_config">client_tls_config()</a>, CaCertificate::binary()) -&gt; <a href="#type-client_tls_config">client_tls_config()</a></tt><br></p>
@@ -226,15 +278,33 @@
 <p> </p>
 </div>
 
+<h3 class="function"><a name="start_client-3">start_client/3</a></h3>
+<div class="spec">
+<p><tt>start_client(ServerUrl::binary(), Options::[<a href="#type-client_setting">client_setting()</a>], Timeout::timeout()) -&gt; {ok, <a href="#type-client">client()</a>} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="start_producer-3">start_producer/3</a></h3>
 <div class="spec">
 <p><tt>start_producer(Client::<a href="#type-client">client()</a>, StreamName::binary(), ProducerSettings::[<a href="#type-producer_setting">producer_setting()</a>]) -&gt; {ok, <a href="#type-producer">producer()</a>} | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
+<h3 class="function"><a name="start_producer-4">start_producer/4</a></h3>
+<div class="spec">
+<p><tt>start_producer(Client::<a href="#type-client">client()</a>, StreamName::binary(), ProducerSettings::[<a href="#type-producer_setting">producer_setting()</a>], Timeout::timeout()) -&gt; {ok, <a href="#type-producer">producer()</a>} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
 <h3 class="function"><a name="start_streaming_fetch-4">start_streaming_fetch/4</a></h3>
 <div class="spec">
 <p><tt>start_streaming_fetch(Client::<a href="#type-client">client()</a>, ReturnPid::pid(), ConsumerName::binary(), SubscriptionId::binary()) -&gt; ok | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="start_streaming_fetch-5">start_streaming_fetch/5</a></h3>
+<div class="spec">
+<p><tt>start_streaming_fetch(Client::<a href="#type-client">client()</a>, ReturnPid::pid(), ConsumerName::binary(), SubscriptionId::binary(), Timeout::timeout()) -&gt; ok | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 <hr>
