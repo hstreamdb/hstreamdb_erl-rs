@@ -262,7 +262,7 @@ create_stream(
             ok;
         {create_stream_reply, error, Err} ->
             {error, Err}
-    after timeout ->
+    after Timeout ->
         ?TIMEOUT_EXIT
     end.
 
