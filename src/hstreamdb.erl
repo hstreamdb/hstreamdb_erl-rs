@@ -667,6 +667,8 @@ read_shard(Client, ShardReaderId, MaxRecords, Timeout) ->
             {ok, Records};
         {read_shard_reply, error, Err} ->
             {error, Err}
+    after Timeout ->
+        ?TIMEOUT_EXIT
     end.
 
 -spec async_read_shard(
