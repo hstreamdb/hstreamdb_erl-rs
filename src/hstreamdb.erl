@@ -484,7 +484,7 @@ async_await_append_result(Pid, AppendResult) ->
 ) ->
     ok | {error, binary()}.
 start_streaming_fetch(Client, ReturnPid, ConsumerName, SubscriptionId) ->
-    start_streaming_fetch(Client, ReturnPid, ConsumerName, SubscriptionId, ?ASYNC_TIMEOUT).
+    start_streaming_fetch(Client, ReturnPid, ConsumerName, SubscriptionId, ?SYNC_TIMEOUT).
 
 -spec start_streaming_fetch(
     Client :: client(),
