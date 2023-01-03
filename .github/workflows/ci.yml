@@ -22,4 +22,53 @@ jobs:
           otp-version: ${{ matrix.otp }}
           rebar3-version: ${{ matrix.rebar3 }}
       - run: |
-          rebar3 fmt --check && rebar3 dialyzer && rebar3 compile && rebar3 edoc
+          #!/usr/bin/env sh
+          set -e
+          ZOOKEEPER_IMAGE='zookeeper:3.6'
+          HSTREAM_IMAGE='hstreamdb/hstream:latest'
+          DATA_STORE='/tmp/hstream/data'
+          mkdir -p $DATA_STORE
+          docker pull $HSTREAM_IMAGE
+          docker run -td --network host \
+            --rm                        \
+            --name hs-test-zk           \
+              $ZOOKEEPER_IMAGE
+          sleep 5
+          docker run -td --network host    \
+            --rm                           \
+            --name hs-test-hstore          \
+            -v     $DATA_STORE:/data/store \
+              $HSTREAM_IMAGE               \
+                ld-dev-cluster             \
+                  --root /data/store       \
+                  --use-tcp
+          sleep 5
+          docker run -td --network host                                        \
+            --name hs-test-hserver0                                            \
+            -v     $DATA_STORE:/data/store                                     \
+              $HSTREAM_IMAGE                                                   \
+                hstream-server                                                 \
+                  --store-config /data/store/logdevice.conf --log-level debug  \
+                  --port 6570 --internal-port 6670 --server-id 0               \
+                  --seed-nodes "127.0.0.1:6670,127.0.0.1:6671,127.0.0.1:6672"
+          docker run -td --network host                                        \
+            --name hs-test-hserver1                                            \
+            -v     $DATA_STORE:/data/store                                     \
+              $HSTREAM_IMAGE                                                   \
+                hstream-server                                                 \
+                  --store-config /data/store/logdevice.conf --log-level debug  \
+                  --port 6571 --internal-port 6671 --server-id 1               \
+                  --seed-nodes "127.0.0.1:6670,127.0.0.1:6671,127.0.0.1:6672"
+          docker run -td --network host                                        \
+            --name hs-test-hserver2                                            \
+            -v     $DATA_STORE:/data/store                                     \
+              $HSTREAM_IMAGE                                                   \
+                hstream-server                                                 \
+                  --store-config /data/store/logdevice.conf --log-level debug  \
+                  --port 6572 --internal-port 6672 --server-id 2               \
+                  --seed-nodes "127.0.0.1:6670,127.0.0.1:6671,127.0.0.1:6672"
+          sleep 5
+          docker exec hs-test-hserver0 hstream init
+          docker exec hs-test-hserver0 hadmin server status
+
+          rebar3 fmt --check && rebar3 dialyzer && rebar3 compile && rebar3 edoc && rebar3 ct
