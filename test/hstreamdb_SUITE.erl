@@ -53,6 +53,8 @@ start_client() ->
 t_start_client(_Cfg) ->
     Client = start_client(),
     ?assert(is_reference(Client)),
+    {ok, _} = hstreamdb:echo(Client, <<"alive">>),
+    {ok, _} = hstreamdb:echo(Client, <<"alive">>),
     try
         hstreamdb:start_client(<<"hstream://example.com:6570">>, [])
     catch
