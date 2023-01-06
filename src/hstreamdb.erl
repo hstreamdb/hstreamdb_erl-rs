@@ -11,6 +11,7 @@
 
 -export([
     start_client/2, start_client/3,
+    echo/2, echo/3,
     new_client_tls_config/0,
     set_domain_name/2,
     set_ca_certificate/2,
@@ -210,6 +211,28 @@ start_client(ServerUrl, Options, Timeout) ->
 ) ->
     ok | {error, {badarg, binary()}}.
 async_start_client(Pid, ServerUrl, Options) ->
+    ?NOT_LOADED.
+
+-spec echo(Client :: client(), Msg :: binary()) -> {ok, binary()} | {error, binary()}.
+echo(Client, Msg) ->
+    echo(Client, Msg, ?SYNC_TIMEOUT).
+
+-spec echo(Client :: client(), Msg :: binary(), Timeout :: timeout()) ->
+    {ok, binary()} | {error, binary()}.
+echo(Client, Msg, Timeout) ->
+    Pid = self(),
+    {} = async_echo(Pid, Client, Msg),
+    receive
+        {echo_reply, ok, Reply} ->
+            {ok, Reply};
+        {echo_reply, error, Err} ->
+            {error, Err}
+    after Timeout ->
+        ?TIMEOUT_EXIT
+    end.
+
+-spec async_echo(Pid :: pid(), Client :: client(), Msg :: binary()) -> {}.
+async_echo(Pid, Client, Msg) ->
     ?NOT_LOADED.
 
 -spec create_stream(
