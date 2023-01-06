@@ -96,6 +96,8 @@
 <tr><td valign="top"><a href="#create_stream-6">create_stream/6</a></td><td></td></tr>
 <tr><td valign="top"><a href="#create_subscription-6">create_subscription/6</a></td><td></td></tr>
 <tr><td valign="top"><a href="#create_subscription-7">create_subscription/7</a></td><td></td></tr>
+<tr><td valign="top"><a href="#echo-2">echo/2</a></td><td></td></tr>
+<tr><td valign="top"><a href="#echo-3">echo/3</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_flush_result-1">is_flush_result/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_ok-1">is_ok/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_record_id-1">is_record_id/1</a></td><td></td></tr>
@@ -209,6 +211,18 @@
 <h3 class="function"><a name="create_subscription-7">create_subscription/7</a></h3>
 <div class="spec">
 <p><tt>create_subscription(Client::<a href="#type-client">client()</a>, SubscriptionId::binary(), StreamName::binary(), AckTimeoutSeconds::pos_integer(), MaxUnackedRecords::pos_integer(), SpecialOffset::<a href="#type-special_offset">special_offset()</a>, Timeout::timeout()) -&gt; ok | {error, {badarg, binary()}} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="echo-2">echo/2</a></h3>
+<div class="spec">
+<p><tt>echo(Client::<a href="#type-client">client()</a>, Msg::binary()) -&gt; {ok, binary()} | {error, binary()}</tt><br></p>
+<p> </p>
+</div>
+
+<h3 class="function"><a name="echo-3">echo/3</a></h3>
+<div class="spec">
+<p><tt>echo(Client::<a href="#type-client">client()</a>, Msg::binary(), Timeout::timeout()) -&gt; {ok, binary()} | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
