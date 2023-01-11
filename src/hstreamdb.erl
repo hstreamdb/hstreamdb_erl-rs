@@ -28,7 +28,7 @@
     start_streaming_fetch/5,
     ack/1, ack/2,
     create_shard_reader/6, create_shard_reader/7,
-    read_shard/3, read_shard/4
+    read_shard/2, read_shard/3
 ]).
 -export([is_record_id/1, shard_id/1, batch_id/1, batch_index/1]).
 -export([is_flush_result/1, is_ok/1, batch_len/1, batch_size/1]).
@@ -47,7 +47,7 @@
     stream_shard_offset/0,
     responder/0,
     streaming_fetch_message/0,
-    shard_reader_id/0,
+    shard_reader/0,
     read_shard_result/0
 ]).
 
@@ -107,7 +107,7 @@ abort_tokio_task(JoinHandle) ->
 -type special_offset() :: earliest | latest.
 -type stream_shard_offset() :: special_offset() | record_id().
 -type responder() :: reference().
--type shard_reader_id() :: reference().
+-type shard_reader() :: reference().
 
 -record(record_id, {
     shard_id :: non_neg_integer(),
@@ -587,9 +587,7 @@ async_ack(Pid, Responder) ->
     StreamShardOffset :: stream_shard_offset(),
     TimeoutMs :: pos_integer()
 ) ->
-    {ok, shard_reader_id()}
-    | {error, {badarg, binary()}}
-    | {error, binary()}.
+    {ok, shard_reader()} | {error, {badarg, binary()}} | {error, binary()}.
 create_shard_reader(
     Client,
     ReaderId,
@@ -617,9 +615,7 @@ create_shard_reader(
     TimeoutMs :: pos_integer(),
     Timeout :: timeout()
 ) ->
-    {ok, shard_reader_id()}
-    | {error, {badarg, binary()}}
-    | {error, binary()}.
+    {ok, shard_reader()} | {error, {badarg, binary()}} | {error, binary()}.
 create_shard_reader(
     Client,
     ReaderId,
@@ -645,8 +641,8 @@ create_shard_reader(
             {error, {badarg, Err}};
         {ok, JoinHandle} ->
             receive
-                {create_shard_reader_reply, ok, ShardReaderId} ->
-                    ShardReaderId;
+                {create_shard_reader_reply, ok, ShardReader} ->
+                    ShardReader;
                 {create_shard_reader_reply, error, Err} ->
                     {error, Err}
             after Timeout ->
@@ -679,24 +675,22 @@ async_create_shard_reader(
     {h_record, binary()} | {raw_record, binary()} | {bad_hstream_record, binary()}.
 
 -spec read_shard(
-    Client :: client(),
-    ShardReaderId :: shard_reader_id(),
+    ShardReader :: shard_reader(),
     MaxRecords :: non_neg_integer()
 ) ->
     {ok, [read_shard_result()]} | {error, binary()}.
-read_shard(Client, ShardReaderId, MaxRecords) ->
-    read_shard(Client, ShardReaderId, MaxRecords, ?ASYNC_TIMEOUT).
+read_shard(ShardReader, MaxRecords) ->
+    read_shard(ShardReader, MaxRecords, ?ASYNC_TIMEOUT).
 
 -spec read_shard(
-    Client :: client(),
-    ShardReaderId :: shard_reader_id(),
+    ShardReader :: shard_reader(),
     MaxRecords :: non_neg_integer(),
     Timeout :: timeout()
 ) ->
     {ok, [read_shard_result()]} | {error, binary()}.
-read_shard(Client, ShardReaderId, MaxRecords, Timeout) ->
+read_shard(ShardReader, MaxRecords, Timeout) ->
     Pid = self(),
-    {ok, JoinHandle} = async_read_shard(Pid, Client, ShardReaderId, MaxRecords),
+    {ok, JoinHandle} = async_read_shard(Pid, ShardReader, MaxRecords),
     receive
         {read_shard_reply, ok, Records} ->
             {ok, Records};
@@ -708,10 +702,9 @@ read_shard(Client, ShardReaderId, MaxRecords, Timeout) ->
 
 -spec async_read_shard(
     Pid :: pid(),
-    Client :: client(),
-    ShardReaderId :: shard_reader_id(),
+    ShardReader :: shard_reader(),
     MaxRecords :: non_neg_integer()
 ) ->
     {ok, join_handle()}.
-async_read_shard(Pid, Client, ShardReaderId, MaxRecords) ->
+async_read_shard(Pid, ShardReader, MaxRecords) ->
     ?NOT_LOADED.
