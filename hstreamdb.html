@@ -63,8 +63,8 @@
 <p><tt>responder() = reference()</tt></p>
 
 
-<h3 class="typedecl"><a name="type-shard_reader_id">shard_reader_id()</a></h3>
-<p><tt>shard_reader_id() = reference()</tt></p>
+<h3 class="typedecl"><a name="type-shard_reader">shard_reader()</a></h3>
+<p><tt>shard_reader() = reference()</tt></p>
 
 
 <h3 class="typedecl"><a name="type-special_offset">special_offset()</a></h3>
@@ -102,8 +102,8 @@
 <tr><td valign="top"><a href="#is_ok-1">is_ok/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#is_record_id-1">is_record_id/1</a></td><td></td></tr>
 <tr><td valign="top"><a href="#new_client_tls_config-0">new_client_tls_config/0</a></td><td></td></tr>
+<tr><td valign="top"><a href="#read_shard-2">read_shard/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#read_shard-3">read_shard/3</a></td><td></td></tr>
-<tr><td valign="top"><a href="#read_shard-4">read_shard/4</a></td><td></td></tr>
 <tr><td valign="top"><a href="#set_ca_certificate-2">set_ca_certificate/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#set_domain_name-2">set_domain_name/2</a></td><td></td></tr>
 <tr><td valign="top"><a href="#set_identity-3">set_identity/3</a></td><td></td></tr>
@@ -180,13 +180,13 @@
 
 <h3 class="function"><a name="create_shard_reader-6">create_shard_reader/6</a></h3>
 <div class="spec">
-<p><tt>create_shard_reader(Client::<a href="#type-client">client()</a>, ReaderId::binary(), StreamName::binary(), ShardId::non_neg_integer(), StreamShardOffset::<a href="#type-stream_shard_offset">stream_shard_offset()</a>, TimeoutMs::pos_integer()) -&gt; {ok, <a href="#type-shard_reader_id">shard_reader_id()</a>} | {error, {badarg, binary()}} | {error, binary()}</tt><br></p>
+<p><tt>create_shard_reader(Client::<a href="#type-client">client()</a>, ReaderId::binary(), StreamName::binary(), ShardId::non_neg_integer(), StreamShardOffset::<a href="#type-stream_shard_offset">stream_shard_offset()</a>, TimeoutMs::pos_integer()) -&gt; {ok, <a href="#type-shard_reader">shard_reader()</a>} | {error, {badarg, binary()}} | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
 <h3 class="function"><a name="create_shard_reader-7">create_shard_reader/7</a></h3>
 <div class="spec">
-<p><tt>create_shard_reader(Client::<a href="#type-client">client()</a>, ReaderId::binary(), StreamName::binary(), ShardId::non_neg_integer(), StreamShardOffset::<a href="#type-stream_shard_offset">stream_shard_offset()</a>, TimeoutMs::pos_integer(), Timeout::timeout()) -&gt; {ok, <a href="#type-shard_reader_id">shard_reader_id()</a>} | {error, {badarg, binary()}} | {error, binary()}</tt><br></p>
+<p><tt>create_shard_reader(Client::<a href="#type-client">client()</a>, ReaderId::binary(), StreamName::binary(), ShardId::non_neg_integer(), StreamShardOffset::<a href="#type-stream_shard_offset">stream_shard_offset()</a>, TimeoutMs::pos_integer(), Timeout::timeout()) -&gt; {ok, <a href="#type-shard_reader">shard_reader()</a>} | {error, {badarg, binary()}} | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
@@ -250,15 +250,15 @@
 <p> </p>
 </div>
 
-<h3 class="function"><a name="read_shard-3">read_shard/3</a></h3>
+<h3 class="function"><a name="read_shard-2">read_shard/2</a></h3>
 <div class="spec">
-<p><tt>read_shard(Client::<a href="#type-client">client()</a>, ShardReaderId::<a href="#type-shard_reader_id">shard_reader_id()</a>, MaxRecords::non_neg_integer()) -&gt; {ok, [<a href="#type-read_shard_result">read_shard_result()</a>]} | {error, binary()}</tt><br></p>
+<p><tt>read_shard(ShardReader::<a href="#type-shard_reader">shard_reader()</a>, MaxRecords::non_neg_integer()) -&gt; {ok, [<a href="#type-read_shard_result">read_shard_result()</a>]} | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
-<h3 class="function"><a name="read_shard-4">read_shard/4</a></h3>
+<h3 class="function"><a name="read_shard-3">read_shard/3</a></h3>
 <div class="spec">
-<p><tt>read_shard(Client::<a href="#type-client">client()</a>, ShardReaderId::<a href="#type-shard_reader_id">shard_reader_id()</a>, MaxRecords::non_neg_integer(), Timeout::timeout()) -&gt; {ok, [<a href="#type-read_shard_result">read_shard_result()</a>]} | {error, binary()}</tt><br></p>
+<p><tt>read_shard(ShardReader::<a href="#type-shard_reader">shard_reader()</a>, MaxRecords::non_neg_integer(), Timeout::timeout()) -&gt; {ok, [<a href="#type-read_shard_result">read_shard_result()</a>]} | {error, binary()}</tt><br></p>
 <p> </p>
 </div>
 
