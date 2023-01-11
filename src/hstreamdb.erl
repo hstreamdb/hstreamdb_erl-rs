@@ -5,7 +5,10 @@
 -on_load(init/0).
 
 -define(NOT_LOADED, not_loaded(?LINE)).
--define(TIMEOUT_EXIT, exit({timeout, {?FUNCTION_NAME, ?FUNCTION_ARITY}})).
+-define(TIMEOUT_EXIT(JoinHandle),
+    {} = abort_tokio_task(JoinHandle),
+    exit({timeout, {?FUNCTION_NAME, ?FUNCTION_ARITY}})
+).
 -define(SYNC_TIMEOUT, 5000).
 -define(ASYNC_TIMEOUT, infinity).
 
@@ -25,7 +28,7 @@
     start_streaming_fetch/5,
     ack/1, ack/2,
     create_shard_reader/6, create_shard_reader/7,
-    read_shard/3, read_shard/4
+    read_shard/2, read_shard/3
 ]).
 -export([is_record_id/1, shard_id/1, batch_id/1, batch_index/1]).
 -export([is_flush_result/1, is_ok/1, batch_len/1, batch_size/1]).
@@ -44,7 +47,7 @@
     stream_shard_offset/0,
     responder/0,
     streaming_fetch_message/0,
-    shard_reader_id/0,
+    shard_reader/0,
     read_shard_result/0
 ]).
 
@@ -80,6 +83,12 @@ priv_path() ->
 not_loaded(Line) ->
     erlang:nif_error({not_loaded, [{module, ?MODULE}, {line, Line}]}).
 
+-type join_handle() :: reference().
+
+-spec abort_tokio_task(JoinHandle :: join_handle()) -> {}.
+abort_tokio_task(JoinHandle) ->
+    ?NOT_LOADED.
+
 -type client() :: reference().
 -type payload_type() :: h_record | raw_record.
 -type producer() :: reference().
@@ -98,7 +107,7 @@ not_loaded(Line) ->
 -type special_offset() :: earliest | latest.
 -type stream_shard_offset() :: special_offset() | record_id().
 -type responder() :: reference().
--type shard_reader_id() :: reference().
+-type shard_reader() :: reference().
 
 -record(record_id, {
     shard_id :: non_neg_integer(),
@@ -194,14 +203,14 @@ start_client(ServerUrl, Options) ->
     {ok, client()} | {error, binary()}.
 start_client(ServerUrl, Options, Timeout) ->
     Pid = self(),
-    ok = async_start_client(Pid, ServerUrl, Options),
+    {ok, JoinHandle} = async_start_client(Pid, ServerUrl, Options),
     receive
         {start_client_reply, ok, Client} ->
             {ok, Client};
         {start_client_reply, error, Err} ->
             {error, Err}
     after Timeout ->
-        ?TIMEOUT_EXIT
+        ?TIMEOUT_EXIT(JoinHandle)
     end.
 
 -spec async_start_client(
@@ -209,7 +218,7 @@ start_client(ServerUrl, Options, Timeout) ->
     ServerUrl :: binary(),
     Options :: [client_setting()]
 ) ->
-    ok | {error, {badarg, binary()}}.
+    {ok, join_handle()} | {error, {badarg, binary()}}.
 async_start_client(Pid, ServerUrl, Options) ->
     ?NOT_LOADED.
 
@@ -221,17 +230,18 @@ echo(Client, Msg) ->
     {ok, binary()} | {error, binary()}.
 echo(Client, Msg, Timeout) ->
     Pid = self(),
-    {} = async_echo(Pid, Client, Msg),
+    {ok, JoinHandle} = async_echo(Pid, Client, Msg),
     receive
         {echo_reply, ok, Reply} ->
             {ok, Reply};
         {echo_reply, error, Err} ->
             {error, Err}
     after Timeout ->
-        ?TIMEOUT_EXIT
+        ?TIMEOUT_EXIT(JoinHandle)
     end.
 
--spec async_echo(Pid :: pid(), Client :: client(), Msg :: binary()) -> {}.
+-spec async_echo(Pid :: pid(), Client :: client(), Msg :: binary()) ->
+    {ok, join_handle()}.
 async_echo(Pid, Client, Msg) ->
     ?NOT_LOADED.
 
@@ -271,7 +281,7 @@ create_stream(
     Timeout
 ) ->
     Pid = self(),
-    {} =
+    {ok, JoinHandle} =
         async_create_stream(
             Pid,
             Client,
@@ -286,7 +296,7 @@ create_stream(
         {create_stream_reply, error, Err} ->
             {error, Err}
     after Timeout ->
-        ?TIMEOUT_EXIT
+        ?TIMEOUT_EXIT(JoinHandle)
     end.
 
 -spec async_create_stream(
@@ -297,7 +307,7 @@ create_stream(
     BacklogDuration :: pos_integer(),
     ShardCount :: pos_integer()
 ) ->
-    {}.
+    {ok, join_handle()}.
 async_create_stream(
     Pid,
     Client,
@@ -368,14 +378,14 @@ create_subscription(
     of
         {error, {badarg, Err}} ->
             {error, {badarg, Err}};
-        ok ->
+        {ok, JoinHandle} ->
             receive
                 {create_subscription_reply, ok} ->
                     ok;
                 {create_subscription_reply, error, Err} ->
                     {error, Err}
             after Timeout ->
-                ?TIMEOUT_EXIT
+                ?TIMEOUT_EXIT(JoinHandle)
             end
     end.
 
@@ -388,7 +398,7 @@ create_subscription(
     MaxUnackedRecords :: pos_integer(),
     SpecialOffset :: special_offset()
 ) ->
-    ok | {error, {badarg, binary()}}.
+    {ok, join_handle()} | {error, {badarg, binary()}}.
 async_create_subscription(
     Pid,
     Client,
@@ -421,14 +431,14 @@ start_producer(Client, StreamName, ProducerSettings, Timeout) ->
     case async_start_producer(Pid, Client, StreamName, ProducerSettings) of
         {error, Err} ->
             {error, Err};
-        ok ->
+        {ok, JoinHandle} ->
             receive
                 {start_producer_reply, ok, Producer} ->
                     {ok, Producer};
                 {start_producer_reply, error, Err} ->
                     {error, Err}
             after Timeout ->
-                ?TIMEOUT_EXIT
+                ?TIMEOUT_EXIT(JoinHandle)
             end
     end.
 
@@ -438,7 +448,7 @@ start_producer(Client, StreamName, ProducerSettings, Timeout) ->
     StreamName :: binary(),
     ProducerSettings :: [producer_setting()]
 ) ->
-    ok | {error, binary()}.
+    {ok, join_handle()} | {error, binary()}.
 async_start_producer(Pid, Client, StreamName, ProducerSettings) ->
     ?NOT_LOADED.
 
@@ -456,14 +466,14 @@ append(Producer, PartitionKey, RawPayload) ->
     {ok, append_result()} | {error, binary()}.
 append(Producer, PartitionKey, RawPayload, Timeout) ->
     Pid = self(),
-    {} = async_append(Pid, Producer, PartitionKey, RawPayload),
+    {ok, JoinHandle} = async_append(Pid, Producer, PartitionKey, RawPayload),
     receive
         {append_reply, ok, AppendResult} ->
             {ok, AppendResult};
         {append_reply, error, Err} ->
             {error, Err}
     after Timeout ->
-        ?TIMEOUT_EXIT
+        ?TIMEOUT_EXIT(JoinHandle)
     end.
 
 -spec async_append(
@@ -472,7 +482,7 @@ append(Producer, PartitionKey, RawPayload, Timeout) ->
     PartitionKey :: binary(),
     RawPayload :: binary()
 ) ->
-    {}.
+    {ok, join_handle()}.
 async_append(Pid, Producer, PartitionKey, RawPayload) ->
     ?NOT_LOADED.
 
@@ -485,17 +495,18 @@ await_append_result(AppendResult) ->
     {ok, record_id()} | {error, binary()}.
 await_append_result(AppendResult, Timeout) ->
     Pid = self(),
-    {} = async_await_append_result(Pid, AppendResult),
+    {ok, JoinHandle} = async_await_append_result(Pid, AppendResult),
     receive
         {await_append_result_reply, ok, RecordId} ->
             {ok, RecordId};
         {await_append_result_reply, error, Err} ->
             {err, Err}
     after Timeout ->
-        ?TIMEOUT_EXIT
+        ?TIMEOUT_EXIT(JoinHandle)
     end.
 
--spec async_await_append_result(Pid :: pid(), AppendResult :: append_result()) -> {}.
+-spec async_await_append_result(Pid :: pid(), AppendResult :: append_result()) ->
+    {ok, join_handle()}.
 async_await_append_result(Pid, AppendResult) ->
     ?NOT_LOADED.
 
@@ -519,14 +530,15 @@ start_streaming_fetch(Client, ReturnPid, ConsumerName, SubscriptionId) ->
     ok | {error, binary()}.
 start_streaming_fetch(Client, ReturnPid, ConsumerName, SubscriptionId, Timeout) ->
     Pid = self(),
-    {} = async_start_streaming_fetch(Pid, Client, ReturnPid, ConsumerName, SubscriptionId),
+    {ok, JoinHandle} =
+        async_start_streaming_fetch(Pid, Client, ReturnPid, ConsumerName, SubscriptionId),
     receive
         {start_streaming_fetch_reply, ok} ->
             ok;
         {start_streaming_fetch_reply, error, Err} ->
             {error, Err}
     after Timeout ->
-        ?TIMEOUT_EXIT
+        ?TIMEOUT_EXIT(JoinHandle)
     end.
 
 -type streaming_fetch_message() ::
@@ -541,7 +553,7 @@ start_streaming_fetch(Client, ReturnPid, ConsumerName, SubscriptionId, Timeout) 
     ConsumerName :: binary(),
     SubscriptionId :: binary()
 ) ->
-    {}.
+    {ok, join_handle()}.
 async_start_streaming_fetch(Pid, Client, ReturnPid, ConsumerName, SubscriptionId) ->
     ?NOT_LOADED.
 
@@ -553,17 +565,17 @@ ack(Responder) ->
     ok | {error, already_acked} | {error, terminated}.
 ack(Responder, Timeout) ->
     Pid = self(),
-    async_ack(Pid, Responder),
+    {ok, JoinHandle} = async_ack(Pid, Responder),
     receive
         {ack_reply, ok} ->
             ok;
         {ack_reply, error, Err} ->
             {error, Err}
     after Timeout ->
-        ?TIMEOUT_EXIT
+        ?TIMEOUT_EXIT(JoinHandle)
     end.
 
--spec async_ack(Pid :: pid(), Responder :: responder()) -> {}.
+-spec async_ack(Pid :: pid(), Responder :: responder()) -> {ok, join_handle()}.
 async_ack(Pid, Responder) ->
     ?NOT_LOADED.
 
@@ -575,9 +587,7 @@ async_ack(Pid, Responder) ->
     StreamShardOffset :: stream_shard_offset(),
     TimeoutMs :: pos_integer()
 ) ->
-    {ok, shard_reader_id()}
-    | {error, {badarg, binary()}}
-    | {error, binary()}.
+    {ok, shard_reader()} | {error, {badarg, binary()}} | {error, binary()}.
 create_shard_reader(
     Client,
     ReaderId,
@@ -605,9 +615,7 @@ create_shard_reader(
     TimeoutMs :: pos_integer(),
     Timeout :: timeout()
 ) ->
-    {ok, shard_reader_id()}
-    | {error, {badarg, binary()}}
-    | {error, binary()}.
+    {ok, shard_reader()} | {error, {badarg, binary()}} | {error, binary()}.
 create_shard_reader(
     Client,
     ReaderId,
@@ -631,14 +639,14 @@ create_shard_reader(
     of
         {error, {badarg, Err}} ->
             {error, {badarg, Err}};
-        ok ->
+        {ok, JoinHandle} ->
             receive
-                {create_shard_reader_reply, ok, ShardReaderId} ->
-                    ShardReaderId;
+                {create_shard_reader_reply, ok, ShardReader} ->
+                    ShardReader;
                 {create_shard_reader_reply, error, Err} ->
                     {error, Err}
             after Timeout ->
-                ?TIMEOUT_EXIT
+                ?TIMEOUT_EXIT(JoinHandle)
             end
     end.
 
@@ -651,7 +659,7 @@ create_shard_reader(
     StreamShardOffset :: stream_shard_offset(),
     TimeoutMs :: pos_integer()
 ) ->
-    ok | {error, {badarg, binary()}}.
+    {ok, join_handle()} | {error, {badarg, binary()}}.
 async_create_shard_reader(
     Pid,
     Client,
@@ -667,39 +675,36 @@ async_create_shard_reader(
     {h_record, binary()} | {raw_record, binary()} | {bad_hstream_record, binary()}.
 
 -spec read_shard(
-    Client :: client(),
-    ShardReaderId :: shard_reader_id(),
+    ShardReader :: shard_reader(),
     MaxRecords :: non_neg_integer()
 ) ->
     {ok, [read_shard_result()]} | {error, binary()}.
-read_shard(Client, ShardReaderId, MaxRecords) ->
-    read_shard(Client, ShardReaderId, MaxRecords, ?ASYNC_TIMEOUT).
+read_shard(ShardReader, MaxRecords) ->
+    read_shard(ShardReader, MaxRecords, ?ASYNC_TIMEOUT).
 
 -spec read_shard(
-    Client :: client(),
-    ShardReaderId :: shard_reader_id(),
+    ShardReader :: shard_reader(),
     MaxRecords :: non_neg_integer(),
     Timeout :: timeout()
 ) ->
     {ok, [read_shard_result()]} | {error, binary()}.
-read_shard(Client, ShardReaderId, MaxRecords, Timeout) ->
+read_shard(ShardReader, MaxRecords, Timeout) ->
     Pid = self(),
-    {} = async_read_shard(Pid, Client, ShardReaderId, MaxRecords),
+    {ok, JoinHandle} = async_read_shard(Pid, ShardReader, MaxRecords),
     receive
         {read_shard_reply, ok, Records} ->
             {ok, Records};
         {read_shard_reply, error, Err} ->
             {error, Err}
     after Timeout ->
-        ?TIMEOUT_EXIT
+        ?TIMEOUT_EXIT(JoinHandle)
     end.
 
 -spec async_read_shard(
     Pid :: pid(),
-    Client :: client(),
-    ShardReaderId :: shard_reader_id(),
+    ShardReader :: shard_reader(),
     MaxRecords :: non_neg_integer()
 ) ->
-    {}.
-async_read_shard(Pid, Client, ShardReaderId, MaxRecords) ->
+    {ok, join_handle()}.
+async_read_shard(Pid, ShardReader, MaxRecords) ->
     ?NOT_LOADED.
