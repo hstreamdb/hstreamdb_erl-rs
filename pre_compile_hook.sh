@@ -2,11 +2,11 @@
 set -e
 
 RS_SRC_DIR='hstreamdb-rust'
-REV='1eb19f16346607105be8a4a9a102725d0128a037'
+REV='40e65e5b59f7464df7c44dda7625b7c713bc59f0'
 
 mkdir -p rs_src
 cd rs_src/
-[ -d $RS_SRC_DIR ] || git clone --recurse-submodules https://github.com/hstreamdb/hstreamdb-rust.git
+[ -d $RS_SRC_DIR ] || git clone --depth=1 --recurse-submodules https://github.com/hstreamdb/hstreamdb-rust.git
 cd $RS_SRC_DIR/
 git checkout $REV
 echo "Compiling $RS_SRC_DIR: REV = $REV"
