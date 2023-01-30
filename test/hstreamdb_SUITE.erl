@@ -143,3 +143,12 @@ t_start_streaming_fetch(_Cfg) ->
         end,
         lists:seq(1, 120)
     ).
+
+t_bad_receive_timeout_value(_Cfg) ->
+    Client = start_client(),
+    {ok, _} = hstreamdb:echo(Client, <<"alive">>),
+    {ok, _} = hstreamdb:echo(Client, <<"alive">>, 10 * 1000),
+    {ok, _} = hstreamdb:echo(Client, <<"alive">>, infinity),
+    {error, _} = hstreamdb:echo(Client, <<"alive">>, 1000.5),
+    {error, _} = hstreamdb:echo(Client, <<"alive">>, -1),
+    {error, _} = hstreamdb:echo(Client, <<"alive">>, finity).
