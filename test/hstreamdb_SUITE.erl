@@ -149,5 +149,6 @@ t_bad_receive_timeout_value(_Cfg) ->
     {ok, _} = hstreamdb:echo(Client, <<"alive">>),
     {ok, _} = hstreamdb:echo(Client, <<"alive">>, 10 * 1000),
     {ok, _} = hstreamdb:echo(Client, <<"alive">>, infinity),
+    {error, _} = hstreamdb:echo(Client, <<"alive">>, 1000.5),
     {error, _} = hstreamdb:echo(Client, <<"alive">>, -1),
     {error, _} = hstreamdb:echo(Client, <<"alive">>, finity).
